@@ -6,6 +6,12 @@ class Pushward < Formula
   license "MIT"
   head "https://github.com/mac-lucky/pushward-cli.git", branch: "main"
 
+  bottle do
+    root_url "https://github.com/mac-lucky/homebrew-tap/releases/download/pushward-0.1.0-rc.1"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "19a1504706b326b66e1ab7eee27cca5ddc7b65e415e68e232d93b65abb2ddd4b"
+    sha256 cellar: :any,                 x86_64_linux: "68be8c65ee766f3730f49b6e2628c1b0f2810e021918252d2cc9cf09b595d1d5"
+  end
+
   depends_on "go" => :build
 
   def install
