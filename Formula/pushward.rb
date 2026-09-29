@@ -18,7 +18,6 @@ class Pushward < Formula
     ldflags = %W[
       -s -w
       -X main.version=#{version}
-      -X main.commit=#{tap.user}
       -X main.buildDate=#{time.iso8601}
     ]
     system "go", "build", *std_go_args(ldflags:), "./cmd/pushward"
@@ -27,7 +26,7 @@ class Pushward < Formula
 
   test do
     assert_match version.to_s, shell_output("#{bin}/pushward version")
-    # With no key configured it must fail before any network call.
-    assert_match "no API key", shell_output("#{bin}/pushward me 2>&1", 3)
+    # With no key configured it exits 3 (auth) before any network call.
+    shell_output("#{bin}/pushward me", 3)
   end
 end

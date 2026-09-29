@@ -41,6 +41,8 @@ jobs:
       id-token: write
       issues: read
       pull-requests: write
+    env:
+      PULL_REQUEST: ${{ inputs.pull_request || github.event.workflow_run.pull_requests[0].number }}
     steps:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@848c272c7bfe984a197bd4d16383f4c106ec61e6 # 2026.09.21.1
@@ -58,7 +60,6 @@ jobs:
           HOMEBREW_GIT_COMMITTER_NAME: ${{ steps.git_setup.outputs.name }}
           HOMEBREW_GIT_COMMITTER_EMAIL: ${{ steps.git_setup.outputs.email }}
           HEAD_SHA: ${{ inputs.head_sha || github.event.workflow_run.head_sha }}
-          PULL_REQUEST: ${{ inputs.pull_request || github.event.workflow_run.pull_requests[0].number }}
         run: |
           if [[ -n "$HEAD_SHA" ]]
           then
@@ -78,17 +79,10 @@ jobs:
         with:
           branch: main
 
-      # The pushed commits carry the PR's changes but not its SHAs, so GitHub
-      # may not see the PR as merged. Close it and drop its branch.
-      - name: Close the pull request
+      # pr-pull's commit closes the PR ("Closes #N."), but leaves its branch.
+      - name: Delete the pull request branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PULL_REQUEST: ${{ inputs.pull_request || github.event.workflow_run.pull_requests[0].number }}
         run: |
-          read -r state branch < <(gh pr view "$PULL_REQUEST" --repo "$GITHUB_REPOSITORY" \
-            --json state,headRefName --jq '"\(.state) \(.headRefName)"')
-          if [[ "$state" == OPEN ]]
-          then
-            gh pr close "$PULL_REQUEST" --repo "$GITHUB_REPOSITORY" --comment "Published with bottles."
-          fi
+          branch=$(gh pr view "$PULL_REQUEST" --repo "$GITHUB_REPOSITORY" --json headRefName --jq .headRefName)
           gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$branch" || true
