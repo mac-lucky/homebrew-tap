@@ -1,0 +1,94 @@
+# brew tap-new's bottle publish workflow, plus a workflow_run trigger: a
+# formula bump PR that a release workflow opened (a branch in this repo named
+# update-<formula>.rb-*, pushed by mac-lucky) is published as soon as its
+# test-bot run passes. Anything else still goes through workflow_dispatch.
+name: brew pr-pull
+
+on:
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: Pull request number
+        required: true
+      head_sha:
+        description: Expected pull request head commit SHA (optional)
+  workflow_run: # zizmor: ignore[dangerous-triggers] same-repo bump branches only, see the job condition
+    workflows: [brew test-bot]
+    types: [completed]
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
+jobs:
+  pr-pull:
+    if: >-
+      github.event_name == 'workflow_dispatch' || (
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_repository.full_name == github.repository &&
+        github.event.workflow_run.actor.login == 'mac-lucky' &&
+        startsWith(github.event.workflow_run.head_branch, 'update-')
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      attestations: write
+      checks: read
+      contents: write
+      id-token: write
+      issues: read
+      pull-requests: write
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@848c272c7bfe984a197bd4d16383f4c106ec61e6 # 2026.09.21.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up git
+        id: git_setup
+        uses: Homebrew/actions/git-user-config@848c272c7bfe984a197bd4d16383f4c106ec61e6 # 2026.09.21.1
+
+      - name: Pull bottles
+        id: pull_bottles
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_GIT_COMMITTER_NAME: ${{ steps.git_setup.outputs.name }}
+          HOMEBREW_GIT_COMMITTER_EMAIL: ${{ steps.git_setup.outputs.email }}
+          HEAD_SHA: ${{ inputs.head_sha || github.event.workflow_run.head_sha }}
+          PULL_REQUEST: ${{ inputs.pull_request || github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          if [[ -n "$HEAD_SHA" ]]
+          then
+            brew pr-pull --debug --retain-bottle-dir --tap="$GITHUB_REPOSITORY" --head-sha="$HEAD_SHA" \
+              "$PULL_REQUEST"
+          else
+            brew pr-pull --debug --retain-bottle-dir --tap="$GITHUB_REPOSITORY" "$PULL_REQUEST"
+          fi
+
+      - name: Generate build provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: "${{ steps.pull_bottles.outputs.bottle_path }}/*.tar.gz"
+
+      - name: Push commits
+        uses: Homebrew/actions/git-try-push@848c272c7bfe984a197bd4d16383f4c106ec61e6 # 2026.09.21.1
+        with:
+          branch: main
+
+      # The pushed commits carry the PR's changes but not its SHAs, so GitHub
+      # may not see the PR as merged. Close it and drop its branch.
+      - name: Close the pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_REQUEST: ${{ inputs.pull_request || github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          read -r state branch < <(gh pr view "$PULL_REQUEST" --repo "$GITHUB_REPOSITORY" \
+            --json state,headRefName --jq '"\(.state) \(.headRefName)"')
+          if [[ "$state" == OPEN ]]
+          then
+            gh pr close "$PULL_REQUEST" --repo "$GITHUB_REPOSITORY" --comment "Published with bottles."
+          fi
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$branch" || true

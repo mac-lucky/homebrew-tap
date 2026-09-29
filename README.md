@@ -1,11 +1,13 @@
 # homebrew-tap
 
-Homebrew casks for my tools. GoReleaser writes them on each release, so don't edit them here.
+Homebrew formulae for my tools.
 
 ```sh
 brew install mac-lucky/tap/pushward
 ```
 
-| Cask | Source |
+| Formula | Source |
 |---|---|
 | `pushward` | [pushward-cli](https://github.com/mac-lucky/pushward-cli), the PushWard command-line client |
+
+Formulae build from the source release and come with bottles for macOS and Linux, so an install is a download, not a build. A release of the tool opens a bump PR here; `brew test-bot` builds the bottles on it and the PR is published once those pass. Don't edit the `bottle do` blocks by hand.
