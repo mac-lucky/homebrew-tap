@@ -17,13 +17,24 @@ jobs:
   test-bot:
     strategy:
       matrix:
-        os: [ macos-26 ]
         include:
+          - os: macos-26
+          - os: macos-15
+          # Intel macOS is Tier 3 for Homebrew and go has no Intel bottle, so
+          # this leg builds Go first. If it fails, the other bottles still
+          # publish and Intel Macs build from source.
+          - os: macos-15-intel
+            optional: true
           - os: ubuntu-latest
             container:
               image: ghcr.io/homebrew/brew:main
               options: --privileged
+          - os: ubuntu-24.04-arm
+            container:
+              image: ghcr.io/homebrew/brew:main
+              options: --privileged
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.optional == true }}
     container: ${{ fromJSON(toJSON(matrix.container)) }} # zizmor: ignore[unpinned-images]
     permissions:
       actions: read
