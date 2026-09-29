@@ -7,9 +7,9 @@ class Pushward < Formula
   head "https://github.com/mac-lucky/pushward-cli.git", branch: "main"
 
   bottle do
-    root_url "https://github.com/mac-lucky/homebrew-tap/releases/download/pushward-0.1.0-rc.1"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "19a1504706b326b66e1ab7eee27cca5ddc7b65e415e68e232d93b65abb2ddd4b"
-    sha256 cellar: :any,                 x86_64_linux: "68be8c65ee766f3730f49b6e2628c1b0f2810e021918252d2cc9cf09b595d1d5"
+    root_url "https://github.com/mac-lucky/homebrew-tap/releases/download/pushward-1.0.0"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "eb378669e3d635c7c8dfe6fe02b2ba1ec39a3676dcc5207f0221eb04f67eda4f"
+    sha256 cellar: :any,                 x86_64_linux: "00e24c62a4a357adcb079725f5f7bf6b42003113ef2fba481e5c02a1a365e5bb"
   end
 
   depends_on "go" => :build
