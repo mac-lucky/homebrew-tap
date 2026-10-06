@@ -1,7 +1,8 @@
 # brew tap-new's bottle publish workflow, plus a workflow_run trigger: a
 # formula bump PR that a release workflow opened (a branch in this repo named
-# update-<formula>.rb-*, pushed by mac-lucky) is published as soon as its
-# test-bot run passes. Anything else still goes through workflow_dispatch.
+# update-<formula>.rb-*, pushed by mac-lucky or by the mac-lucky-ci GitHub App
+# the release workflows push with) is published as soon as its test-bot run
+# passes. Anything else still goes through workflow_dispatch.
 name: brew pr-pull
 
 on:
@@ -29,7 +30,7 @@ jobs:
         github.event.workflow_run.event == 'pull_request' &&
         github.event.workflow_run.conclusion == 'success' &&
         github.event.workflow_run.head_repository.full_name == github.repository &&
-        github.event.workflow_run.actor.login == 'mac-lucky' &&
+        contains(fromJSON('["mac-lucky", "mac-lucky-ci[bot]"]'), github.event.workflow_run.actor.login) &&
         startsWith(github.event.workflow_run.head_branch, 'update-')
       )
     runs-on: ubuntu-latest
