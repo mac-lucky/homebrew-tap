@@ -1,8 +1,8 @@
 class Pushward < Formula
   desc "Command-line client for PushWard notifications, Live Activities and widgets"
   homepage "https://github.com/mac-lucky/pushward-cli"
-  url "https://github.com/mac-lucky/pushward-cli/archive/refs/tags/v1.5.0.tar.gz"
-  sha256 "94c0e870f489e35d1ebf786341a84003e01437791619cb950223282438565690"
+  url "https://github.com/mac-lucky/pushward-cli/archive/refs/tags/v1.5.1.tar.gz"
+  sha256 "e9e3a01c59be403c6758e55a1ac8b0204f16e2f1be43eb2bf419248e0aeb04dd"
   license "MIT"
   head "https://github.com/mac-lucky/pushward-cli.git", branch: "main"
 
