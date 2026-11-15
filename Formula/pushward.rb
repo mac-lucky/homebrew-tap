@@ -7,11 +7,11 @@ class Pushward < Formula
   head "https://github.com/mac-lucky/pushward-cli.git", branch: "main"
 
   bottle do
-    root_url "https://github.com/mac-lucky/homebrew-tap/releases/download/pushward-1.12.0"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "0989f171907dc4689aaf40db2f4efd6d0ac87aa2c06bab68e7d1201642664a47"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "006b513a245592115830024146598cd8e970a663c0550001d9e6847bfce6b4f3"
-    sha256 cellar: :any_skip_relocation, arm64_linux:   "86534616c808515adeabcbc1fc025bb170ab2fa656b7e8a798b255653b42c7e1"
-    sha256 cellar: :any,                 x86_64_linux:  "daf5f69e5dd768398340e1c33b1a7c029eabb2d676878ad20446960c5bf51e84"
+    root_url "https://github.com/mac-lucky/homebrew-tap/releases/download/pushward-1.13.0"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6ccde61deafed7cdc700c48cb31b9f95a3849e7f04943b13dad4bd51339bec37"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8de8810ad07d54e4cd5c51138eefa00d24fe9b1f89240c6357cb1c966f32c7c7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "18968cb21d0f65d6f7eedf187bd16fe5f3d198e80d1fc7008c141bb1319779fb"
+    sha256 cellar: :any,                 x86_64_linux:  "9db279e1550daaa23c64201fcaeda7c861218aabd212eb3f6c90160c453da3ad"
   end
 
   depends_on "go" => :build
